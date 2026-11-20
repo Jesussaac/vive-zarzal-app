@@ -236,7 +236,13 @@ export const create = async (req, res) => {
     return renderWithError('La categoría seleccionada no es válida.');
   }
 
-  const tagIds = value.tagIds ?? [];
+const tagIds = value.tagIds;
+if (tagIds.length > 0) {
+  const foundTags = await Tag.count({ where: { id: tagIds } });
+  if (foundTags !== tagIds.length) {
+    return renderWithError('Alguna de las etiquetas seleccionadas no es válida.');
+  }
+}
 
 const transaction = await sequelize.transaction();
 try {
@@ -323,6 +329,13 @@ export const update = async (req, res) => {
 
   if (!categories.some((category) => category.id === value.categoryId)) {
     return renderWithError('La categoría seleccionada no es válida.');
+  }
+  const tagIds = value.tagIds;
+  if (tagIds.length > 0) {
+  const foundTags = await Tag.count({ where: { id: tagIds } });
+  if (foundTags !== tagIds.length) {
+    return renderWithError('Alguna de las etiquetas seleccionadas no es válida.');
+  }
   }
 
   const previousImage = publication.imageUrl;
