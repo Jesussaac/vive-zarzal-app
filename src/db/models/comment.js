@@ -23,6 +23,12 @@ export const Comment = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    isHidden: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'is_hidden',
+    },
   },
   {
     tableName: 'comments',

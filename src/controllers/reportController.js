@@ -42,7 +42,9 @@ const submitReport = async (req, res, { target, targetKey, publicationId, ownMes
 };
 
 export const reportPublication = async (req, res) => {
-  const publication = await Publication.findByPk(req.params.id);
+  const publication = await Publication.findOne({
+    where: { id: req.params.id, isHidden: false },
+  });
 
   if (!publication) {
     throw httpError(404, 'Publicación no encontrada.');
@@ -57,7 +59,9 @@ export const reportPublication = async (req, res) => {
 };
 
 export const reportComment = async (req, res) => {
-  const comment = await Comment.findByPk(req.params.id);
+  const comment = await Comment.findOne({
+    where: { id: req.params.id, isHidden: false },
+  });
 
   if (!comment) {
     throw httpError(404, 'Comentario no encontrado.');

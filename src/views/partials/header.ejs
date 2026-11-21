@@ -25,10 +25,13 @@
           <a href="/favorites" class="<%= path === '/favorites' ? 'active' : '' %>">Favoritos</a>
         <% } %>
         <% if (can('categories:manage')) { %>
-            <a href="/admin/categories" class="<%= path.startsWith('/admin') && !path.startsWith('/admin/users') ? 'active' : '' %>">Administrar</a>
-          <% } else if (can('tags:manage')) { %>
-            <a href="/admin/tags" class="<%= path.startsWith('/admin') && !path.startsWith('/admin/users') ? 'active' : '' %>">Administrar</a>
-          <% } %>
+          <a href="/admin/categories" class="<%= path.startsWith('/admin') && !path.startsWith('/admin/users') && !path.startsWith('/admin/reports') ? 'active' : '' %>">Administrar</a>
+        <% } else if (can('tags:manage')) { %>
+          <a href="/admin/tags" class="<%= path.startsWith('/admin') && !path.startsWith('/admin/users') && !path.startsWith('/admin/reports') ? 'active' : '' %>">Administrar</a>
+        <% } %>
+        <% if (can('reports:manage')) { %>
+          <a href="/admin/reports" class="<%= path.startsWith('/admin/reports') ? 'active' : '' %>">Reportes</a>
+        <% } %>
         <% if (can('roles:manage')) { %>
           <a href="/admin/users" class="<%= path.startsWith('/admin/users') ? 'active' : '' %>">Usuarios</a>
         <% } %>

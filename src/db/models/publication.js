@@ -45,6 +45,12 @@ export const Publication = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    isHidden: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'is_hidden',
+    },
   },
   {
     tableName: 'publications',

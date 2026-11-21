@@ -46,6 +46,8 @@ export const publicationSummaryInclude = [
     model: Comment,
     as: 'comments',
     attributes: ['id'],
+    where: { isHidden: false },
+    required: false,
   },
 ];
 
@@ -54,6 +56,7 @@ const publicationDetailInclude = [
   {
     model: Comment,
     as: 'comments',
+    where: { isHidden: false },
     separate: true,
     order: [['createdAt', 'DESC']],
     include: [
@@ -119,7 +122,9 @@ const loadCategories = () =>
   Category.findAll({ order: [['name', 'ASC']] });
 
 const findPublication = async (id) => {
-  const publication = await Publication.findByPk(id);
+  const publication = await Publication.findOne({
+    where: { id, isHidden: false },
+  });
 
   if (!publication) {
     throw httpError(404, 'Publicación no encontrada.');
@@ -137,6 +142,7 @@ const assertOwner = (publication, user) => {
 export const listFeed = async (req, res) => {
   const [publications, categories] = await Promise.all([
     Publication.findAll({
+      where: { isHidden: false },
       include: publicationSummaryInclude,
       order: [['createdAt', 'DESC']],
       limit: 30,
@@ -159,7 +165,7 @@ export const listByCategory = async (req, res) => {
   }
 
   const publications = await Publication.findAll({
-    where: { categoryId: category.id },
+    where: { categoryId: category.id, isHidden: false },
     include: publicationSummaryInclude,
     order: [['createdAt', 'DESC']],
   });
@@ -184,7 +190,7 @@ export const listFavorites = async (req, res) => {
 
   const publications = favoriteIds.size
     ? await Publication.findAll({
-        where: { id: [...favoriteIds] },
+        where: { id: [...favoriteIds], isHidden: false },
         include: publicationSummaryInclude,
       })
     : [];
@@ -278,7 +284,8 @@ try {
 };
 
 export const showDetail = async (req, res) => {
-  const publication = await Publication.findByPk(req.params.id, {
+  const publication = await Publication.findOne({
+    where: { id: req.params.id, isHidden: false },
     include: publicationDetailInclude,
   });
 

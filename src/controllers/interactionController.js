@@ -13,7 +13,9 @@ import {
 import { httpError } from '../utils/httpError.js';
 
 const findPublication = async (id) => {
-  const publication = await Publication.findByPk(id);
+  const publication = await Publication.findOne({
+    where: { id, isHidden: false },
+  });
 
   if (!publication) {
     throw httpError(404, 'Publicación no encontrada.');
@@ -23,7 +25,9 @@ const findPublication = async (id) => {
 };
 
 const findOwnComment = async (id, user) => {
-  const comment = await Comment.findByPk(id);
+  const comment = await Comment.findOne({
+    where: { id, isHidden: false },
+  });
 
   if (!comment) {
     throw httpError(404, 'Comentario no encontrado.');

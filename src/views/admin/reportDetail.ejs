@@ -1,0 +1,117 @@
+<%- include('../partials/header') %>
+
+<style>
+  .detail-box {
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .reported-content {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  .decision-bar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+</style>
+
+<main class="container section">
+  <div class="section-heading">
+    <h2>Detalle del reporte #<%= report.id %></h2>
+    <a href="/admin/reports?status=<%= report.status %>" class="btn btn-ghost btn-small">← Volver a la cola</a>
+  </div>
+
+  <section class="detail-box">
+    <div class="detail-grid">
+      <div>
+        <span class="muted">Estado</span><br>
+        <strong><%= statusLabels[report.status] || report.status %></strong>
+      </div>
+      <div>
+        <span class="muted">Motivo</span><br>
+        <strong><%= reasonLabels[report.reason] || report.reason %></strong>
+      </div>
+      <div>
+        <span class="muted">Reportado por</span><br>
+        <strong><%= report.reporter?.firstName %> <%= report.reporter?.lastName %></strong>
+        (@<%= report.reporter?.username %>)
+      </div>
+      <div>
+        <span class="muted">Fecha del reporte</span><br>
+        <strong><%= new Date(report.createdAt).toLocaleString('es-CO') %></strong>
+      </div>
+    </div>
+
+    <% if (report.details) { %>
+      <div>
+        <span class="muted">Detalles adicionales del reportante</span>
+        <p><%= report.details %></p>
+      </div>
+    <% } %>
+
+    <% if (report.reviewedAt) { %>
+      <p class="help">
+        Revisado por <strong>@<%= report.reviewer?.username || 'moderador' %></strong>
+        el <%= new Date(report.reviewedAt).toLocaleString('es-CO') %>.
+      </p>
+    <% } %>
+  </section>
+
+  <section class="detail-box">
+    <h3>Contenido reportado</h3>
+
+    <% if (report.publication) { %>
+      <p class="muted">
+        Tipo: <strong>Publicación</strong> · Autor:
+        <strong>@<%= report.publication.author?.username %></strong>
+        <% if (report.publication.isHidden) { %> · <strong>(Oculta)</strong><% } %>
+      </p>
+      <div class="reported-content">
+        <h4><%= report.publication.title %></h4>
+        <p><%= report.publication.description %></p>
+        <% if (!report.publication.isHidden) { %>
+          <a href="/publications/<%= report.publication.id %>" class="btn btn-outline btn-small">Ver publicación</a>
+        <% } %>
+      </div>
+    <% } else if (report.comment) { %>
+      <p class="muted">
+        Tipo: <strong>Comentario</strong> · Autor:
+        <strong>@<%= report.comment.author?.username %></strong>
+        <% if (report.comment.publication) { %>
+          · En publicación: <strong><%= report.comment.publication.title %></strong>
+        <% } %>
+        <% if (report.comment.isHidden) { %> · <strong>(Oculto)</strong><% } %>
+      </p>
+      <div class="reported-content">
+        <p><%= report.comment.content %></p>
+        <% if (report.comment.publication) { %>
+          <a href="/publications/<%= report.comment.publication.id %>" class="btn btn-outline btn-small">Ir a la publicación</a>
+        <% } %>
+      </div>
+    <% } %>
+  </section>
+
+  <% if (report.status === 'pending') { %>
+    <div class="decision-bar">
+      <form action="/admin/reports/<%= report.id %>/approve" method="post" class="inline-form">
+        <button type="submit" class="btn btn-primary">Aprobar reporte y ocultar contenido</button>
+      </form>
+      <form action="/admin/reports/<%= report.id %>/dismiss" method="post" class="inline-form">
+        <button type="submit" class="btn btn-outline">Descartar reporte</button>
+      </form>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

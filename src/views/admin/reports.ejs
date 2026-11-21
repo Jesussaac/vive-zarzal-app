@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+
+<style>
+  .report-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .report-card {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+  }
+  .report-meta {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin: 0.25rem 0;
+  }
+  .report-excerpt {
+    margin: 0.5rem 0 0;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 0.5rem;
+    font-size: 0.92rem;
+  }
+  .report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .badge-status {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+</style>
+
+<main class="container section">
+  <div class="section-heading">
+    <h2>Cola de reportes</h2>
+    <span class="badge-status"><%= statusLabels[currentStatus] %></span>
+  </div>
+
+  <nav class="report-filters" aria-label="Filtrar reportes por estado">
+    <a
+      href="/admin/reports?status=pending"
+      class="btn btn-small <%= currentStatus === 'pending' ? 'btn-primary' : 'btn-outline' %>"
+    >
+      Pendientes (<%= counts.pending %>)
+    </a>
+    <a
+      href="/admin/reports?status=approved"
+      class="btn btn-small <%= currentStatus === 'approved' ? 'btn-primary' : 'btn-outline' %>"
+    >
+      Aprobados (<%= counts.approved %>)
+    </a>
+    <a
+      href="/admin/reports?status=dismissed"
+      class="btn btn-small <%= currentStatus === 'dismissed' ? 'btn-primary' : 'btn-outline' %>"
+    >
+      Descartados (<%= counts.dismissed %>)
+    </a>
+  </nav>
+
+  <% if (reports.length === 0) { %>
+    <p class="help">No hay reportes en estado "<%= statusLabels[currentStatus].toLowerCase() %>".</p>
+  <% } %>
+
+  <% reports.forEach((report) => { %>
+    <article class="report-card">
+      <div style="flex: 1; min-width: 240px;">
+        <div>
+          <strong>
+            <%= report.publication ? 'Publicación' : 'Comentario' %> #<%= report.publication ? report.publication.id : report.comment?.id %>
+          </strong>
+          · Motivo: <strong><%= reasonLabels[report.reason] || report.reason %></strong>
+        </div>
+
+        <p class="report-meta">
+          Reportado por <strong>@<%= report.reporter?.username %></strong>
+          · <%= new Date(report.createdAt).toLocaleString('es-CO') %>
+          <% if (report.reviewer) { %>
+            · Revisado por <strong>@<%= report.reviewer.username %></strong>
+          <% } %>
+        </p>
+
+        <div class="report-excerpt">
+          <% if (report.publication) { %>
+            <strong><%= report.publication.title %></strong>:
+            <%= report.publication.description.slice(0, 140) %><%= report.publication.description.length > 140 ? '…' : '' %>
+          <% } else if (report.comment) { %>
+            "<%= report.comment.content.slice(0, 140) %><%= report.comment.content.length > 140 ? '…' : '' %>"
+          <% } %>
+        </div>
+      </div>
+
+      <div class="report-actions">
+        <a href="/admin/reports/<%= report.id %>" class="btn btn-ghost btn-small">Ver detalle</a>
+
+        <% if (report.status === 'pending') { %>
+          <form action="/admin/reports/<%= report.id %>/approve" method="post" class="inline-form">
+            <button type="submit" class="btn btn-primary btn-small">Aprobar y ocultar</button>
+          </form>
+          <form action="/admin/reports/<%= report.id %>/dismiss" method="post" class="inline-form">
+            <button type="submit" class="btn btn-outline btn-small">Descartar</button>
+          </form>
+        <% } %>
+      </div>
+    </article>
+  <% }) %>
+</main>
+
+<%- include('../partials/footer') %>
