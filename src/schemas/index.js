@@ -91,4 +91,25 @@ export const reportSchema = Joi.object({
   }),
 });
 
+export const categorySchema = Joi.object({
+  name: Joi.string().trim().min(2).max(80).required().messages({
+    'string.empty': 'Escribe el nombre de la categoría',
+    'string.min': 'El nombre debe tener al menos 2 caracteres',
+    'string.max': 'El nombre no puede superar los 80 caracteres',
+    'any.required': 'Escribe el nombre de la categoría',
+  }),
+  description: Joi.string().trim().allow('').max(255).optional().messages({
+    'string.max': 'La descripción no puede superar los 255 caracteres',
+  }),
+});
+
+export const tagSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(50).required().messages({
+    'string.empty': 'Escribe el nombre de la etiqueta',
+    'string.min': 'El nombre debe tener al menos 2 caracteres',
+    'string.max': 'El nombre no puede superar los 50 caracteres',
+    'any.required': 'Escribe el nombre de la etiqueta',
+  }),
+});
+
 export const firstError = (error) => error.details[0].message;

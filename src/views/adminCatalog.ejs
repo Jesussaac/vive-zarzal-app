@@ -1,0 +1,98 @@
+<%- include('partials/header') %>
+
+<main class="container admin-page">
+  <div class="section-heading">
+    <h1>Administrar <%= label.plural %></h1>
+  </div>
+
+  <nav class="admin-tabs" aria-label="Catálogos">
+    <% if (can('categories:manage')) { %>
+      <a href="/admin/categories" class="<%= basePath === '/admin/categories' ? 'active' : '' %>">Categorías</a>
+    <% } %>
+    <% if (can('tags:manage')) { %>
+      <a href="/admin/tags" class="<%= basePath === '/admin/tags' ? 'active' : '' %>">Etiquetas</a>
+    <% } %>
+  </nav>
+
+  <form class="form card-form admin-create" action="<%= basePath %>" method="post">
+    <h2>Nueva <%= label.singular %></h2>
+
+    <div class="form-group">
+      <label for="new-name">Nombre</label>
+      <input id="new-name" name="name" type="text" required minlength="2" maxlength="<%= hasDescription ? 80 : 50 %>">
+    </div>
+
+    <% if (hasDescription) { %>
+      <div class="form-group">
+        <label for="new-description">Descripción (opcional)</label>
+        <textarea id="new-description" name="description" rows="2" maxlength="255"></textarea>
+      </div>
+    <% } %>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Crear <%= label.singular %></button>
+    </div>
+  </form>
+
+  <section class="admin-list">
+    <h2><%= items.length %> <%= items.length === 1 ? label.singular : label.plural %></h2>
+
+    <% if (items.length === 0) { %>
+      <p class="help">Todavía no hay <%= label.plural %>.</p>
+    <% } %>
+
+    <% items.forEach((item) => { %>
+      <article class="admin-item">
+        <div class="admin-item-head">
+          <div>
+            <strong><%= item.name %></strong>
+            <small class="help">/<%= item.slug %></small>
+            <% if (hasDescription && item.description) { %>
+              <p class="help"><%= item.description %></p>
+            <% } %>
+          </div>
+
+          <div class="admin-item-actions">
+            <form
+              action="<%= basePath %>/<%= item.id %>/delete"
+              method="post"
+              class="inline-form"
+              onsubmit="return confirm('¿Eliminar esta <%= label.singular %>?<%= hasDescription ? '' : ' Se quitará de las publicaciones que la usen.' %>');"
+            >
+              <button type="submit" class="btn btn-outline btn-small">Eliminar</button>
+            </form>
+          </div>
+        </div>
+
+        <details class="admin-edit">
+          <summary class="btn btn-ghost btn-small">Editar</summary>
+          <form class="admin-edit-form" action="<%= basePath %>/<%= item.id %>/edit" method="post">
+            <div class="form-group">
+              <label for="name-<%= item.id %>">Nombre</label>
+              <input
+                id="name-<%= item.id %>"
+                name="name"
+                type="text"
+                value="<%= item.name %>"
+                required
+                minlength="2"
+                maxlength="<%= hasDescription ? 80 : 50 %>"
+              >
+            </div>
+
+            <% if (hasDescription) { %>
+              <div class="form-group">
+                <label for="description-<%= item.id %>">Descripción</label>
+                <textarea id="description-<%= item.id %>" name="description" rows="2" maxlength="255"><%= item.description || '' %></textarea>
+              </div>
+            <% } %>
+
+            <button type="submit" class="btn btn-primary btn-small">Guardar cambios</button>
+          </form>
+        </details>
+      </article>
+    <% }) %>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

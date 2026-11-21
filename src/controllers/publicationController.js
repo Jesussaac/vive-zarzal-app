@@ -8,7 +8,12 @@ import {
   Tag,
   User,
 } from '../db/models/index.js';
-import { firstError, publicationSchema } from '../schemas/index.js';
+import {
+  firstError,
+  publicationSchema,
+  REPORT_REASON_LABELS,
+  REPORT_REASONS,
+} from '../schemas/index.js';
 import { httpError } from '../utils/httpError.js';
 import {
   deleteStoredImage,
@@ -286,6 +291,8 @@ export const showDetail = async (req, res) => {
   return res.render('publicationDetail', {
     title: card.title,
     publication: card,
+    reportReasons: REPORT_REASONS,
+    reportReasonLabels: REPORT_REASON_LABELS,
   });
 };
 

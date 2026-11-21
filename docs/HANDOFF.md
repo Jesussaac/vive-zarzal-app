@@ -43,13 +43,15 @@ Estas tablas y modelos existen para que el siguiente equipo construya las funcio
 
 | Funcionalidad | Base disponible | Trabajo pendiente |
 | --- | --- | --- |
-| Roles y permisos | `roles`, `permissions`, `role_permissions`, `user_roles` | Middleware de autorización, panel de administración, asignación de roles. |
+| Roles y permisos | `roles`, `permissions`, `role_permissions`, `user_roles`, middlewares `requireRole` y `requirePermission` (ver `docs/PERMISSIONS.md`) | Asignación de roles desde el panel de administración (el panel de categorías y etiquetas ya usa los permisos `categories:manage` y `tags:manage`). |
 | Documentos | `document_types`, `user_documents` | Formulario de documentos, carga de soportes, verificación por administrador. |
 | Ubicaciones | `countries`, `departments`, `cities`, `user_addresses` | Selectores dependientes y gestión de direcciones. |
-| Etiquetas | `tags`, `publication_tags` | Selector de etiquetas al publicar, filtros y páginas por etiqueta. |
+| Etiquetas | `tags`, `publication_tags` | Selector de etiquetas al publicar, filtros y páginas por etiqueta (la gestión de etiquetas en el panel de administración ya está implementada). |
 | Favoritos | `favorites` | Botón guardar/quitar y listado de favoritos. |
 | Notificaciones | `notifications` | Centro de notificaciones y creación al recibir interacciones. |
 | Moderación | `reports` | Cola de revisión para moderadores: listar pendientes, aprobar o descartar (la creación de reportes ya está implementada). |
+
+* Panel de administración para gestionar categorías (solo `admin`) y etiquetas (`admin` y `moderator`): crear, editar y eliminar, con generación automática del `slug`, validación de duplicados y bloqueo al eliminar una categoría que tiene publicaciones.
 
 ## Arquitectura
 
@@ -59,7 +61,7 @@ Navegador
   ▼
 Express 5 + EJS
   │
-  ├── middlewares/auth.js       Carga el usuario y sus roles desde el JWT
+  ├── middlewares/auth.js       Carga el usuario, sus roles y permisos desde el JWT
   ├── router/*                  Rutas HTTP
   ├── controllers/*             Lógica de aplicación
   ├── schemas/index.js          Validación con Joi
@@ -78,7 +80,7 @@ PostgreSQL
 | `src/router/index.js` | Punto de unión de todos los routers. |
 | `src/db/models/index.js` | Exportación de modelos y asociaciones. |
 | `src/db/migrations/` | Historial del esquema. |
-| `src/middlewares/auth.js` | Usuario actual, roles y autenticación requerida. |
+| `src/middlewares/auth.js` | Usuario actual, roles, permisos y autorización por rol/permiso. |
 | `src/controllers/` | Casos de uso existentes. |
 | `src/views/` | Vistas EJS. |
 | `docs/DATABASE.md` | Catálogo detallado del esquema. |
@@ -106,7 +108,7 @@ npm run lint
 
 ### Prioridad alta
 
-1. Middleware de autorización por rol/permiso y pruebas de acceso.
+1. ~~Middleware de autorización por rol/permiso y pruebas de acceso.~~ (hecho, ver `docs/PERMISSIONS.md`)
 2. Panel de administración para roles, categorías, etiquetas y reportes.
 3. Cola de revisión de reportes: listar pendientes, aprobar o descartar.
 4. Etiquetas en publicaciones y filtros por etiqueta.
@@ -141,10 +143,10 @@ npm run lint
 ## Checklist para el equipo entrante
 
 - [X] Leer `README.md`, `docs/DATABASE.md` y este documento.
-- [ ] Crear `.env` y levantar PostgreSQL.
-- [ ] Ejecutar migraciones y seeders.
-- [ ] Ejecutar `npm test` y `npm run lint`.
-- [ ] Revisar el backlog priorizado.
-- [ ] Definir la primera funcionalidad y crear una rama desde `refactor/food-community-forum`.
-- [ ] Agregar pruebas para cada funcionalidad nueva.
-- [ ] Actualizar `docs/DATABASE.md` si cambia el esquema.
+- [X] Crear `.env` y levantar PostgreSQL.
+- [X] Ejecutar migraciones y seeders.
+- [X] Ejecutar `npm test` y `npm run lint`.
+- [X] Revisar el backlog priorizado.
+- [X] Definir la primera funcionalidad y crear una rama desde `refactor/food-community-forum`.
+- [X] Agregar pruebas para cada funcionalidad nueva.
+- [X] Actualizar `docs/DATABASE.md` si cambia el esquema.

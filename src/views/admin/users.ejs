@@ -1,0 +1,105 @@
+<%- include('../partials/header') %>
+
+<style>
+  .admin-table-wrap { overflow-x: auto; }
+  .admin-table { width: 100%; border-collapse: collapse; }
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem 0.5rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  .role-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .role-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.35rem 0.15rem 0.7rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 999px;
+    font-size: 0.875rem;
+  }
+  .role-chip-remove {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 0.3rem;
+  }
+  .assign-form { display: flex; gap: 0.4rem; align-items: center; }
+</style>
+
+<main class="container section">
+  <div class="section-heading">
+    <h2>Usuarios y roles</h2>
+    <span class="muted">
+      <%= users.length %> <%= users.length === 1 ? 'usuario' : 'usuarios' %>
+    </span>
+  </div>
+
+  <nav class="admin-subnav" aria-label="Administración">
+    <% if (can('categories:manage')) { %><a href="/admin/categories">Categorías</a><% } %>
+    <% if (can('tags:manage')) { %><a href="/admin/tags">Etiquetas</a><% } %>
+    <a href="/admin/users" class="active">Usuarios</a>
+  </nav>
+
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Roles</th>
+          <th>Agregar rol</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach((person) => { %>
+          <% const available = roles.filter((role) => !person.roles.some((own) => own.id === role.id)); %>
+          <tr>
+            <td>
+              <strong><%= person.firstName %> <%= person.lastName %></strong>
+              <% if (person.id === currentUser.id) { %><span class="muted">(tú)</span><% } %>
+              <br>
+              <span class="muted">@<%= person.username %> · <%= person.email %></span>
+            </td>
+            <td>
+              <div class="role-list">
+                <% person.roles.forEach((role) => { %>
+                  <div class="role-chip">
+                    <span><%= role.name %></span>
+                    <form action="/admin/users/<%= person.id %>/roles/<%= role.id %>/delete" method="post" class="inline-form">
+                      <button
+                        type="submit"
+                        class="role-chip-remove"
+                        title="Quitar el rol <%= role.name %>"
+                        aria-label="Quitar el rol <%= role.name %> a <%= person.firstName %>"
+                      >×</button>
+                    </form>
+                  </div>
+                <% }) %>
+              </div>
+            </td>
+            <td>
+              <% if (available.length) { %>
+                <form action="/admin/users/<%= person.id %>/roles" method="post" class="assign-form">
+                  <select name="roleId" aria-label="Rol para <%= person.firstName %>" required>
+                    <% available.forEach((role) => { %>
+                      <option value="<%= role.id %>"><%= role.name %></option>
+                    <% }) %>
+                  </select>
+                  <button type="submit" class="btn btn-small btn-outline">Agregar</button>
+                </form>
+              <% } else { %>
+                <span class="muted">Tiene todos los roles</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
