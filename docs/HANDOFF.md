@@ -44,7 +44,7 @@ Estas tablas y modelos existen para que el siguiente equipo construya las funcio
 | Funcionalidad | Base disponible | Trabajo pendiente |
 | --- | --- | --- |
 | Roles y permisos | `roles`, `permissions`, `role_permissions`, `user_roles`, middlewares `requireRole` y `requirePermission` (ver `docs/PERMISSIONS.md`) | Asignación de roles desde el panel de administración (el panel de categorías y etiquetas ya usa los permisos `categories:manage` y `tags:manage`). |
-| Documentos | `document_types`, `user_documents` | Formulario de documentos, carga de soportes, verificación por administrador. |
+| Documentos | `document_types`, `user_documents`, CRUD propio en `/profile/documents` | Carga de soportes, verificación por administrador (`documents:verify`). |
 | Ubicaciones | `countries`, `departments`, `cities`, `user_addresses` | Selectores dependientes y gestión de direcciones. |
 | Etiquetas | `tags`, `publication_tags` | Selector de etiquetas al publicar, filtros y páginas por etiqueta (la gestión de etiquetas en el panel de administración ya está implementada). |
 | Favoritos | `favorites` | Botón guardar/quitar y listado de favoritos. |

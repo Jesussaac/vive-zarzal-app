@@ -30,6 +30,9 @@
         <p class="muted">Esta persona todavía no ha escrito una biografía.</p>
       <% } %>
       <p class="muted">Miembro desde <%= joined %></p>
+      <% if (isOwnProfile) { %>
+        <p><a href="/profile/documents">Mis documentos</a></p>
+      <% } %>
     </div>
 
     <% if (isOwnProfile) { %>

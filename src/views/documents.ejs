@@ -1,0 +1,105 @@
+<%- include('partials/header') %>
+
+<main class="container form-page">
+  <div class="section-heading">
+    <h1>Mis documentos</h1>
+    <a class="btn btn-ghost" href="/users/<%= currentUser.id %>">Volver al perfil</a>
+  </div>
+
+  <p class="muted">
+    Solo tú ves esta página. El número aparece oculto en la lista y nunca se muestra en tu perfil público.
+  </p>
+
+  <% if (!documents.length) { %>
+    <div class="empty-state">
+      <p>Todavía no has registrado ningún documento.</p>
+    </div>
+  <% } else { %>
+    <div class="document-list">
+      <% documents.forEach((document) => { %>
+        <article class="document-item">
+          <div class="document-main">
+            <h3>
+              <%= document.typeName %>
+              <span class="badge badge-role"><%= document.typeCode %></span>
+              <% if (document.isVerified) { %>
+                <span class="badge badge-verified">Verificado</span>
+              <% } %>
+            </h3>
+            <p class="muted">Número: <%= document.maskedNumber %></p>
+            <p class="muted">
+              Expedición: <%= document.issuedAt || 'sin fecha' %> ·
+              Vencimiento: <%= document.expiresAt || 'sin fecha' %>
+            </p>
+          </div>
+
+          <div class="owner-actions">
+            <a class="btn btn-outline btn-small" href="/profile/documents/<%= document.id %>/edit">Editar</a>
+            <form
+              action="/profile/documents/<%= document.id %>/delete"
+              method="post"
+              class="inline-form"
+              onsubmit="return confirm('¿Eliminar este documento?');"
+            >
+              <button type="submit" class="btn btn-danger btn-small">Eliminar</button>
+            </form>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <div class="section-heading document-form-heading">
+    <h2>Agregar documento</h2>
+  </div>
+
+  <form action="/profile/documents" method="post" class="form card-form">
+    <div class="form-group">
+      <label for="documentTypeId">Tipo de documento</label>
+      <select id="documentTypeId" name="documentTypeId" required>
+        <option value="" disabled <%= values.documentTypeId ? '' : 'selected' %>>Selecciona un tipo</option>
+        <% documentTypes.forEach((type) => { %>
+          <option
+            value="<%= type.id %>"
+            <%= String(values.documentTypeId) === String(type.id) ? 'selected' : '' %>
+            <%= type.alreadyUsed ? 'disabled' : '' %>
+          >
+            <%= type.name %><%= type.alreadyUsed ? ' (ya registrado)' : '' %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="documentNumber">Número de documento</label>
+      <input
+        id="documentNumber"
+        name="documentNumber"
+        type="text"
+        value="<%= values.documentNumber || '' %>"
+        required
+        minlength="4"
+        maxlength="50"
+        autocomplete="off"
+      >
+      <p class="help">Solo letras, números y guiones, sin puntos ni espacios.</p>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="issuedAt">Fecha de expedición (opcional)</label>
+        <input id="issuedAt" name="issuedAt" type="date" value="<%= values.issuedAt || '' %>">
+      </div>
+      <div class="form-group">
+        <label for="expiresAt">Fecha de vencimiento (opcional)</label>
+        <input id="expiresAt" name="expiresAt" type="date" value="<%= values.expiresAt || '' %>">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Guardar documento</button>
+    </div>
+  </form>
+</main>
+
+<%- include('partials/footer') %>

@@ -956,3 +956,21 @@ p {
 .admin-edit-form { display: grid; gap: 0.75rem; margin-top: 0.75rem; max-width: 28rem; }
 .admin-edit-form input,
 .admin-edit-form textarea { width: 100%; box-sizing: border-box; min-width: 0; }
+
+/* Documentos del perfil */
+.document-list { display: grid; gap: 0.75rem; margin: 1.25rem 0 2rem; }
+.document-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+}
+.document-main h3 { margin: 0 0 0.25rem; }
+.document-main p { margin: 0; }
+.document-form-heading { margin-top: 1rem; }
+.badge-verified { background: var(--success-soft); color: var(--green); }

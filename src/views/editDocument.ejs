@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+
+<main class="container form-page">
+  <div class="section-heading">
+    <h1>Editar documento</h1>
+  </div>
+
+  <form action="/profile/documents/<%= document.id %>/edit" method="post" class="form card-form">
+    <div class="form-group">
+      <label for="documentType">Tipo de documento</label>
+      <input id="documentType" type="text" value="<%= document.typeName %>" disabled>
+      <p class="help">Para cambiar el tipo, elimina este documento y crea uno nuevo.</p>
+    </div>
+
+    <div class="form-group">
+      <label for="documentNumber">Número de documento</label>
+      <input
+        id="documentNumber"
+        name="documentNumber"
+        type="text"
+        value="<%= values.documentNumber || '' %>"
+        required
+        minlength="4"
+        maxlength="50"
+        autocomplete="off"
+      >
+      <% if (document.isVerified) { %>
+        <p class="help">Si cambias los datos, el documento dejará de estar verificado.</p>
+      <% } %>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="issuedAt">Fecha de expedición (opcional)</label>
+        <input id="issuedAt" name="issuedAt" type="date" value="<%= values.issuedAt || '' %>">
+      </div>
+      <div class="form-group">
+        <label for="expiresAt">Fecha de vencimiento (opcional)</label>
+        <input id="expiresAt" name="expiresAt" type="date" value="<%= values.expiresAt || '' %>">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <a class="btn btn-ghost" href="/profile/documents">Cancelar</a>
+    </div>
+  </form>
+</main>
+
+<%- include('partials/footer') %>
