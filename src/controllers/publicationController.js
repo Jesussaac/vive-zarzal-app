@@ -354,15 +354,27 @@ export const update = async (req, res) => {
 
   const previousImage = publication.imageUrl;
 
-  await publication.update({
-    categoryId: value.categoryId,
-    type: value.type,
-    title: value.title,
-    description: value.description,
-    imageUrl: req.file ? `/uploads/${req.file.filename}` : previousImage,
-    ingredients: value.type === 'recipe' ? value.ingredients : null,
-    instructions: value.type === 'recipe' ? value.instructions : null,
-  });
+  const transaction = await sequelize.transaction();
+
+  try {
+    await publication.update(
+      {
+        categoryId: value.categoryId,
+        type: value.type,
+        title: value.title,
+        description: value.description,
+        imageUrl: req.file ? `/uploads/${req.file.filename}` : previousImage,
+        ingredients: value.type === 'recipe' ? value.ingredients : null,
+        instructions: value.type === 'recipe' ? value.instructions : null,
+      },
+      { transaction },
+    );
+    await publication.setTags(tagIds, { transaction });
+    await transaction.commit();
+  } catch (err) {
+    await transaction.rollback();
+    throw err;
+  }
 
   if (req.file && previousImage) {
     deleteStoredImage(previousImage);
