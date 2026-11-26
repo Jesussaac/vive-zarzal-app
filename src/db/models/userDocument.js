@@ -45,6 +45,11 @@ export const UserDocument = sequelize.define(
       allowNull: true,
       field: 'verified_at',
     },
+    supportPath: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'support_path',
+    },
   },
   {
     tableName: 'user_documents',

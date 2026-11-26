@@ -31,6 +31,14 @@
               Expedición: <%= document.issuedAt || 'sin fecha' %> ·
               Vencimiento: <%= document.expiresAt || 'sin fecha' %>
             </p>
+            <% if (document.hasSupport) { %>
+              <p class="muted">
+                Soporte:
+                <a href="/profile/documents/<%= document.id %>/support" target="_blank" rel="noopener">Ver soporte</a>
+              </p>
+            <% } else { %>
+              <p class="muted">Sin soporte. Puedes cargarlo al editar el documento.</p>
+            <% } %>
           </div>
 
           <div class="owner-actions">

@@ -2,6 +2,7 @@ import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { sequelize } from '../src/libraries/DBConnection.js';
 import {
+  City,
   Country,
   Department,
   DocumentType,
@@ -79,13 +80,19 @@ test('los catálogos iniciales están sembrados', async () => {
   assert.ok((await DocumentType.count()) >= 5);
   assert.ok((await Tag.count()) >= 8);
 
+  assert.ok((await Country.count()) >= 7);
+  assert.ok((await City.count()) >= 70);
+
   const colombia = await Country.findOne({
     where: { iso2: 'CO' },
     include: [{ model: Department, as: 'departments' }],
   });
 
   assert.ok(colombia);
-  assert.ok(colombia.departments.length >= 3);
+  assert.ok(colombia.departments.length >= 33);
+
+  const zarzal = await City.findOne({ where: { name: 'Zarzal' } });
+  assert.ok(zarzal);
 });
 
 test('las asociaciones nuevas están registradas', () => {

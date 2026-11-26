@@ -6,6 +6,9 @@ import {
 } from '../schemas/index.js';
 import { httpError } from '../utils/httpError.js';
 import { formatDateOnly, maskDocumentNumber } from '../utils/documents.js';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { SUPPORTS_DIR } from '../middlewares/uploadSupport.js';
 
 const DUPLICATE_TYPE_MESSAGE =
   'Ya registraste un documento de este tipo. Edítalo o elimínalo para cambiarlo.';
@@ -50,6 +53,25 @@ const findOwnDocument = async (req) => {
   return document;
 };
 
+// Comprueba que el documento sea del usuario ANTES de que Multer toque el disco.
+export const loadOwnDocument = async (req, res, next) => {
+  req.document = await findOwnDocument(req);
+  return next();
+};
+
+// Solo se guarda el nombre del archivo; basename evita salirse de la carpeta.
+const supportFilePath = (fileName) =>
+  path.join(SUPPORTS_DIR, path.basename(fileName));
+
+const removeSupportFile = async (fileName) => {
+  if (!fileName) return;
+  try {
+    await fs.unlink(supportFilePath(fileName));
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err;
+  }
+};
+
 const renderDocuments = async (req, res, { status = 200, error, values = {} } = {}) => {
   const [documents, documentTypes] = await Promise.all([
     UserDocument.findAll({
@@ -75,6 +97,7 @@ const renderDocuments = async (req, res, { status = 200, error, values = {} } = 
       issuedAt: formatDateOnly(document.issuedAt),
       expiresAt: formatDateOnly(document.expiresAt),
       isVerified: document.isVerified,
+      hasSupport: Boolean(document.supportPath),
     })),
     documentTypes: documentTypes.map((type) => ({
       id: type.id,
@@ -93,6 +116,7 @@ const renderEditDocument = (res, document, { status = 200, error, values } = {})
       id: document.id,
       typeName: document.documentType.name,
       isVerified: document.isVerified,
+      hasSupport: Boolean(document.supportPath),
     },
     values: values || {
       documentNumber: document.documentNumber,
@@ -215,10 +239,59 @@ export const updateDocument = async (req, res) => {
 
 export const deleteDocument = async (req, res) => {
   const document = await findOwnDocument(req);
+  const supportFile = document.supportPath;
 
   await document.destroy();
+  // El registro ya se borró; si el archivo falla, solo se deja en el log.
+  await removeSupportFile(supportFile).catch((err) => console.error(err));
 
   return res.redirect(
     `/profile/documents?success=${encodeURIComponent('Documento eliminado.')}`
   );
+};
+
+export const uploadDocumentSupport = async (req, res) => {
+  if (!req.file) {
+    throw httpError(400, 'Debes adjuntar un soporte en PDF, JPG o PNG.');
+  }
+
+  const { document } = req;
+  const previousFile = document.supportPath;
+
+  try {
+    await document.update({ supportPath: req.file.filename });
+  } catch (err) {
+    await removeSupportFile(req.file.filename);
+    throw err;
+  }
+
+  await removeSupportFile(previousFile);
+
+  return res.redirect(
+    `/profile/documents?success=${encodeURIComponent('Soporte cargado.')}`
+  );
+};
+
+export const downloadDocumentSupport = async (req, res) => {
+  const document = await findOwnDocument(req);
+
+  if (!document.supportPath) {
+    throw httpError(404, 'Este documento no tiene soporte.');
+  }
+
+  const filePath = supportFilePath(document.supportPath);
+
+  try {
+    await fs.access(filePath);
+  } catch {
+    throw httpError(404, 'El archivo de soporte no se encuentra.');
+  }
+
+  return res.sendFile(filePath, {
+    headers: {
+      'Cache-Control': 'private, no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
+    
+  });
 };

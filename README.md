@@ -49,6 +49,8 @@ El proyecto queda preparado como punto de entrada para un equipo de desarrollo q
 * Comentarios editables y eliminables únicamente por su autor.
 * Perfil público con las publicaciones y roles de cada usuario.
 * Edición del perfil propio (nombre, apellido, correo y biografía).
+* Documentos propios en `/profile/documents`: registro, edición y eliminación, con el número enmascarado en la lista.
+* Soporte opcional por documento (PDF, JPG o PNG, hasta 5 MB), guardado fuera de `src/public/` y visible solo para su dueño.
 * Validación de formularios con Joi y manejo centralizado de errores.
 
 ## Base preparada para nuevas funcionalidades
@@ -58,7 +60,7 @@ El esquema incluye tablas y modelos listos para que el siguiente equipo implemen
 | Área | Tablas | Siguiente paso sugerido |
 | --- | --- | --- |
 | Control de acceso | `roles`, `permissions`, `role_permissions`, `user_roles` | Middleware `requireRole`, panel de administración y asignación de roles. |
-| Identidad | `document_types`, `user_documents` | Formulario de documentos, carga de soportes y verificación. |
+| Identidad | `document_types`, `user_documents` |Verificación de documentos por un administrador (`documents:verify`).|
 | Ubicación | `countries`, `departments`, `cities`, `user_addresses` | Selectores de ubicación y direcciones del perfil. |
 | Descubrimiento | `tags`, `publication_tags`, `favorites` | Etiquetas en publicaciones, filtros y lista de favoritos. |
 | Notificaciones | `notifications` | Centro de notificaciones y envío al recibir likes, comentarios o calificaciones. |
@@ -73,7 +75,7 @@ El esquema incluye tablas y modelos listos para que el siguiente equipo implemen
 * **PostgreSQL** como base de datos
 * **JWT** y **bcryptjs** para autenticación
 * **Joi** para validación
-* **Multer** para la subida de imágenes
+* **Multer** para la subida de imágenes y de soportes de documentos
 * **Docker Compose** para levantar PostgreSQL y pgAdmin
 * **ESLint** y el runner de pruebas integrado de Node.js
 
@@ -96,8 +98,11 @@ src/
 ├── schemas/index.js          # Esquemas de validación con Joi
 ├── utils/                    # JWT, bcrypt y errores HTTP
 └── views/                    # Vistas EJS
+storage/
+└── supports/                 # Soportes de documentos (privados, no se versionan)
 tests/
 ├── forum.test.js             # Flujos funcionales del foro
+├── documentSupports.test.js  # Carga, descarga protegida y borrado de soportes
 └── schema.test.js            # Tablas, catálogos y asociaciones
 docs/
 ├── DATABASE.md               # Catálogo detallado del esquema
@@ -222,6 +227,13 @@ Las imágenes subidas se guardan en `src/public/uploads/`. Ese contenido no se v
 | `POST` | `/admin/tags/:id/delete` | Eliminar etiqueta | Permiso `tags:manage` |
 | `POST` | `/publications/:id/report` | Reportar una publicación | Autenticado |
 | `POST` | `/comments/:id/report` | Reportar un comentario | Autenticado |
+| `GET` | `/profile/documents` | Listar mis documentos | Autenticado |
+| `POST` | `/profile/documents` | Registrar un documento | Autenticado |
+| `GET` | `/profile/documents/:id/edit` | Formulario de edición | Dueño |
+| `POST` | `/profile/documents/:id/edit` | Actualizar documento | Dueño |
+| `POST` | `/profile/documents/:id/delete` | Eliminar documento y su soporte | Dueño |
+| `POST` | `/profile/documents/:id/support` | Subir o reemplazar el soporte (multipart, PDF/JPG/PNG, máx. 5 MB) | Dueño |
+| `GET` | `/profile/documents/:id/support` | Descargar el soporte | Dueño |
 
 ## Modelo de datos
 
@@ -302,6 +314,7 @@ Las pruebas cubren los flujos funcionales y la estructura de la base de datos:
 * Me gusta, calificaciones y comentarios.
 * Perfil público y edición de perfil.
 * Presencia de las 21 tablas, catálogos iniciales y asociaciones nuevas.
+* Soportes de documentos: tipo inválido, tamaño excedido, acceso de terceros (403) y borrado del archivo físico.
 
 Requisitos:
 
@@ -348,6 +361,7 @@ npm run lint
 * Las imágenes se almacenan en el sistema de archivos local; para producción se recomienda almacenamiento compartido u objeto.
 * Los formularios no incluyen protección CSRF. La cookie de autenticación es `httpOnly` y `sameSite=lax`, y se marca `secure` en producción.
 * `npm audit` reporta vulnerabilidades moderadas en dependencias transitivas de desarrollo. La única alerta de producción restante proviene de `uuid` dentro de Sequelize 6; corregirla requeriría una actualización mayor del ORM.
+* Los soportes de documentos se guardan en `storage/supports/` del servidor. En producción hay que montar esa carpeta como volumen o usar almacenamiento privado compartido, y respaldarla. El filtro valida el tipo MIME declarado, no el contenido del archivo.
 
 El detalle de pendientes y la guía de continuidad están en [`docs/HANDOFF.md`](docs/HANDOFF.md).
 

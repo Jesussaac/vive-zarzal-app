@@ -20,6 +20,7 @@ Documento de continuidad para el equipo que retoma el desarrollo de **Vive Zarza
 * Edición de datos del perfil propio.
 * Validación con Joi y manejo centralizado de errores.
 * Reporte de publicaciones y comentarios por parte de usuarios autenticados, con motivo de una lista cerrada, detalles opcionales, estado inicial `pending` y bloqueo de reportes duplicados o sobre contenido propio.
+* Documentos propios con soporte opcional (PDF, JPG o PNG, máx. 5 MB): carga, reemplazo, descarga solo por el dueño y borrado del archivo al eliminar el documento.
 
 ### Base de datos
 
@@ -44,7 +45,7 @@ Estas tablas y modelos existen para que el siguiente equipo construya las funcio
 | Funcionalidad | Base disponible | Trabajo pendiente |
 | --- | --- | --- |
 | Roles y permisos | `roles`, `permissions`, `role_permissions`, `user_roles`, middlewares `requireRole` y `requirePermission` (ver `docs/PERMISSIONS.md`) | Asignación de roles desde el panel de administración (el panel de categorías y etiquetas ya usa los permisos `categories:manage` y `tags:manage`). |
-| Documentos | `document_types`, `user_documents`, CRUD propio en `/profile/documents` | Carga de soportes, verificación por administrador (`documents:verify`). |
+| Documentos | `document_types`, `user_documents` (incluye `support_path`), CRUD propio y soportes en `/profile/documents` | Verificación por administrador (`documents:verify`).
 | Ubicaciones | `countries`, `departments`, `cities`, `user_addresses` | Selectores dependientes y gestión de direcciones. |
 | Etiquetas | `tags`, `publication_tags` | Selector de etiquetas al publicar, filtros y páginas por etiqueta (la gestión de etiquetas en el panel de administración ya está implementada). |
 | Favoritos | `favorites` | Botón guardar/quitar y listado de favoritos. |
@@ -116,7 +117,7 @@ npm run lint
 
 ### Prioridad media
 
-6. Gestión de documentos y verificación.
+6. Verificación de documentos por un administrador (la gestión propia y los soportes ya están implementados).
 7. Direcciones y selectores de país/departamento/ciudad.
 8. Notificaciones al recibir likes, comentarios y calificaciones.
 9. Búsqueda y paginación del feed.
@@ -139,6 +140,7 @@ npm run lint
 * No hay CSRF, paginación, búsqueda ni recuperación de contraseña todavía.
 * La alerta de `npm audit` en producción proviene de `uuid` dentro de Sequelize 6; corregirla implica una actualización mayor del ORM.
 * Índices únicos parciales en `reports` para impedir que un usuario reporte dos veces el mismo contenido.
+* Los soportes de documentos viven en `storage/supports/`, fuera de `src/public/` y sin versionar. El nombre lo genera el servidor, solo el dueño los descarga y la autorización corre antes de Multer. El filtro valida el tipo MIME declarado, no los bytes del archivo.
 
 ## Checklist para el equipo entrante
 

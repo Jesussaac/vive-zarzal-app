@@ -218,4 +218,12 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# User-uploaded images
+src/public/uploads/*
+!src/public/uploads/.gitkeep
+
+# User document supports (sensitive, never public)
+storage/
+
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,node
+

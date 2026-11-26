@@ -45,6 +45,38 @@
       <a class="btn btn-ghost" href="/profile/documents">Cancelar</a>
     </div>
   </form>
+  
+  <form
+    action="/profile/documents/<%= document.id %>/support"
+    method="post"
+    enctype="multipart/form-data"
+    class="form card-form"
+  >
+    <div class="form-group">
+      <label for="support">Soporte del documento</label>
+      <input
+        id="support"
+        name="support"
+        type="file"
+        accept="application/pdf,image/jpeg,image/png"
+        required
+      >
+      <p class="help">PDF, JPG o PNG, de máximo 5 MB. Solo tú puedes verlo.</p>
+      <% if (document.hasSupport) { %>
+        <p class="help">
+          Ya hay un soporte cargado.
+          <a href="/profile/documents/<%= document.id %>/support" target="_blank" rel="noopener">Ver soporte actual</a>.
+          Si subes otro, reemplazará al anterior.
+        </p>
+      <% } %>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        <%= document.hasSupport ? 'Reemplazar soporte' : 'Subir soporte' %>
+      </button>
+    </div>
+  </form>
 </main>
 
 <%- include('partials/footer') %>
