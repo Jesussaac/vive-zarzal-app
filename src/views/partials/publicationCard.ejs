@@ -8,6 +8,13 @@
     <a class="badge badge-category" href="/categories/<%= publication.category.slug %>">
       <%= publication.category.name %>
     </a>
+        <% if (publication.tags && publication.tags.length) { %>
+      <div class="card-tags">
+        <% publication.tags.forEach((tag) => { %>
+          <span class="badge badge-tag">#<%= tag.name %></span>
+        <% }) %>
+      </div>
+    <% } %>
 
     <h3 class="card-title">
       <a href="/publications/<%= publication.id %>"><%= publication.title %></a>

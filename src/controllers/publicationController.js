@@ -32,6 +32,12 @@ export const publicationSummaryInclude = [
     as: 'category',
     attributes: ['id', 'name', 'slug'],
   },
+    {
+    model: Tag,
+    as: 'tags',
+    attributes: ['id', 'name'],
+    through: { attributes: [] },
+  },
   {
     model: Like,
     as: 'likes',
