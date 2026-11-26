@@ -60,7 +60,22 @@
         <% }) %>
       </select>
     </div>
-
+    
+    <div class="form-group">
+      <label for="tagIds">Etiquetas</label>
+      <% const selectedTagIds = [].concat(values.tagIds || []).map(String); %>
+      <select id="tagIds" name="tagIds" multiple size="6">
+        <% tags.forEach((tag) => { %>
+          <option
+            value="<%= tag.id %>"
+            <%= selectedTagIds.includes(String(tag.id)) ? 'selected' : '' %>
+          >
+            <%= tag.name %>
+          </option>
+        <% }) %>
+      </select>
+      <small class="help">Máximo 5. Mantén Ctrl para elegir varias.</small>
+    </div>
     <div class="form-group">
       <label for="image">Imagen</label>
       <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">

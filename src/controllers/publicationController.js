@@ -121,6 +121,8 @@ export const toPublicationCards = async (publications, currentUser) => {
 const loadCategories = () =>
   Category.findAll({ order: [['name', 'ASC']] });
 
+const loadTags = () => Tag.findAll({ order: [['name', 'ASC']] });
+
 const findPublication = async (id) => {
   const publication = await Publication.findOne({
     where: { id, isHidden: false },
@@ -212,18 +214,26 @@ export const listFavorites = async (req, res) => {
 };
 
 export const showCreate = async (req, res) => {
-  const categories = await loadCategories();
+ 
+    const [categories, tags] = await Promise.all([
+    loadCategories(),
+    loadTags(),
+  ]);
 
   return res.render('publicationForm', {
     title: 'Nueva publicación',
     mode: 'create',
     categories,
-    values: { type: 'dish' },
+    tags,
+    values: { type: 'dish', tagIds: [] },
   });
 };
 
 export const create = async (req, res) => {
-  const categories = await loadCategories();
+    const [categories, tags] = await Promise.all([
+    loadCategories(),
+    loadTags(),
+  ]);
   const { error, value } = publicationSchema.validate(req.body, {
     abortEarly: false,
   });
@@ -234,6 +244,7 @@ export const create = async (req, res) => {
       title: 'Nueva publicación',
       mode: 'create',
       categories,
+      tags,
       values: req.body,
       error: message,
     });
@@ -307,13 +318,21 @@ export const showEdit = async (req, res) => {
   const publication = await findPublication(req.params.id);
   assertOwner(publication, req.currentUser);
 
-  const categories = await loadCategories();
+   const [categories, tags, currentTags] = await Promise.all([
+     loadCategories(),
+     loadTags(),
+    publication.getTags({ attributes: ['id'] }),
+  ]);
 
   return res.render('publicationForm', {
     title: 'Editar publicación',
     mode: 'edit',
     categories,
-    values: publication.get({ plain: true }),
+    tags,
+    values: {
+    ...publication.get({ plain: true }),
+    tagIds: currentTags.map((tag) => tag.id),
+    },
   });
 };
 
@@ -321,7 +340,10 @@ export const update = async (req, res) => {
   const publication = await findPublication(req.params.id);
   assertOwner(publication, req.currentUser);
 
-  const categories = await loadCategories();
+    const [categories, tags] = await Promise.all([
+    loadCategories(),
+    loadTags(),
+  ]);
   const { error, value } = publicationSchema.validate(req.body, {
     abortEarly: false,
   });
@@ -332,6 +354,7 @@ export const update = async (req, res) => {
       title: 'Editar publicación',
       mode: 'edit',
       categories,
+      tags,
       values: { ...publication.get({ plain: true }), ...req.body },
       error: message,
     });
